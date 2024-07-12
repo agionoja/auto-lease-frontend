@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 type Props = {
   type: string;
@@ -6,6 +6,7 @@ type Props = {
   label: string;
   name: string;
   value?: string;
+  validator?: (value: string) => boolean;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 };
 
@@ -15,8 +16,16 @@ export function LabelInput({
   placeholder,
   label,
   value,
-  onChange,
+  validator,
 }: Props) {
+  const [isvalid, setIsValid] = useState(false);
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (validator) setIsValid(validator(event.target.value));
+  };
+
+  const handleBlur = (event: React.ChangeEvent<HTMLInputElement>) => {};
+
   return (
     <label className="flex-col flex gap-2">
       <span>{label}</span>
@@ -26,7 +35,7 @@ export function LabelInput({
         type={type}
         name={name}
         value={value}
-        onChange={onChange}
+        onChange={handleChange}
       />
     </label>
   );

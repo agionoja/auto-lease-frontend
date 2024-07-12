@@ -32,29 +32,47 @@ export default function Register() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordConfirm, setPasswordConfirm] = useState("");
+  const [name, setName] = useState("");
   const [isFormValid, setIsFormValid] = useState(false);
 
   useEffect(() => {
-    setIsFormValid(email.length > 0 && password.length > 0);
-  }, [email, password]);
+    setIsFormValid(
+      email.length > 0 &&
+        password.length > 0 &&
+        passwordConfirm.length > 0 &&
+        name.length > 0,
+    );
+  }, [email, password, passwordConfirm, name]);
 
   useEffect(() => {
-    if (!isSubmitting) {
+    if (!isSubmitting && actionData?.message === "success") {
       formRef?.current?.reset();
+      setEmail("");
+      setPassword("");
+      setPasswordConfirm("");
+      setName("");
     }
-  }, [isSubmitting]);
+  }, [isSubmitting, actionData]);
 
   return (
     <Form ref={formRef} className={"flex flex-col gap-8 "} method={"POST"}>
       <LabelInput
-        label={"Email"}
+        label={"Full Name"}
+        type={"text"}
+        name={"name"}
+        placeholder={"Full Name"}
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+      />
+      <LabelInput
+        label={"Email Address"}
         type={"email"}
         name={"email"}
         placeholder={"Email"}
         value={email}
         onChange={(e) => setEmail(e.target.value)}
       />
-
       <LabelInput
         label={"Password"}
         type={"password"}
@@ -63,17 +81,23 @@ export default function Register() {
         value={password}
         onChange={(e) => setPassword(e.target.value)}
       />
-
+      <LabelInput
+        label={"Confirm Password"}
+        type={"password"}
+        name={"passwordConfirm"}
+        placeholder={"Confirm Password"}
+        value={passwordConfirm}
+        onChange={(e) => setPasswordConfirm(e.target.value)}
+      />
       {actionData?.message && (
         <div className="text-red-500">{actionData.message}</div>
       )}
-
       <button
         type="submit"
-        disabled={!isFormValid || isSubmitting}
+        disabled={isSubmitting}
         className={`bg-black text-white py-3 rounded-lg ${isFormValid ? "opacity-100" : "opacity-50"} ${isSubmitting && "cursor-not-allowed"}`}
       >
-        {isSubmitting ? "Submitting..." : "Login"}
+        {isSubmitting ? "Submitting..." : "Register"}
       </button>
     </Form>
   );

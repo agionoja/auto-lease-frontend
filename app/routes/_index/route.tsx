@@ -11,7 +11,7 @@ export const meta: MetaFunction = () => {
 export default function Index() {
   return (
     <div className="font-sans p-4">
-      <img src={authImg} className={"mx-auto"} alt="" />
+      <h1 className={"bg-red-300 animate-bounce "}>This is the home page</h1>
     </div>
   );
 }
