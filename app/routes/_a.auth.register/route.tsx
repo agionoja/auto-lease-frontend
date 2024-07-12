@@ -1,15 +1,17 @@
 import { ActionFunctionArgs, json, redirect } from "@remix-run/node";
-import { Form, useNavigation, useActionData } from "@remix-run/react";
-import { LabelInput } from "~/components/label-input";
 import fetchClient from "~/utils/fetchClient";
+import { Form, useActionData, useNavigation } from "@remix-run/react";
 import { useEffect, useRef, useState } from "react";
+import { LabelInput } from "~/components/label-input";
 
 export async function action({ request }: ActionFunctionArgs) {
-  const { email, password } = Object.fromEntries(await request.formData());
+  const { email, password, passwordConfirm, name } = Object.fromEntries(
+    await request.formData(),
+  );
 
-  const res = await fetchClient("/auth/sign-in", {
+  const res = await fetchClient("/auth/sign-up", {
     method: "POST",
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ email, password, passwordConfirm, name }),
   });
 
   console.log(res);
@@ -22,7 +24,7 @@ export async function action({ request }: ActionFunctionArgs) {
   return json({ message: "Network error occurred. Please try again later." });
 }
 
-export default function Login() {
+export default function Register() {
   const actionData = useActionData();
   const navigate = useNavigation();
   const isSubmitting = navigate.state === "submitting";
