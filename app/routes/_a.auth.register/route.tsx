@@ -17,7 +17,7 @@ export async function action({ request }: ActionFunctionArgs) {
   console.log(res);
 
   if (res.statusText === "success") {
-    return redirect("/auth/2fa/login");
+    return redirect("/");
   } else if (res.statusText === "fail" || res.statusText === "error") {
     return json({ message: res.message });
   }
@@ -62,32 +62,24 @@ export default function Register() {
         type={"text"}
         name={"name"}
         placeholder={"Full Name"}
-        value={name}
-        onChange={(e) => setName(e.target.value)}
       />
       <LabelInput
         label={"Email Address"}
         type={"email"}
         name={"email"}
         placeholder={"Email"}
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
       />
       <LabelInput
         label={"Password"}
         type={"password"}
         name={"password"}
         placeholder={"Password"}
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
       />
       <LabelInput
         label={"Confirm Password"}
         type={"password"}
         name={"passwordConfirm"}
         placeholder={"Confirm Password"}
-        value={passwordConfirm}
-        onChange={(e) => setPasswordConfirm(e.target.value)}
       />
       {actionData?.message && (
         <div className="text-red-500">{actionData.message}</div>
@@ -95,9 +87,9 @@ export default function Register() {
       <button
         type="submit"
         disabled={isSubmitting}
-        className={`bg-black text-white py-3 rounded-lg ${isFormValid ? "opacity-100" : "opacity-50"} ${isSubmitting && "cursor-not-allowed"}`}
+        className={`bg-black text-white py-3 rounded-lg ${isSubmitting && "opacity-50"} ${isSubmitting && "cursor-not-allowed"}`}
       >
-        {isSubmitting ? "Submitting..." : "Register"}
+        {isSubmitting ? "Registering..." : "Register"}
       </button>
     </Form>
   );

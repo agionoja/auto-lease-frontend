@@ -15,8 +15,8 @@ export async function action({ request }: ActionFunctionArgs) {
   console.log(res);
 
   if (res.statusText === "success") {
-    // return redirect("/auth/2fa/login");
-    return json({ message: res.message });
+    return redirect("/auth/2fa/login");
+    // return json({ message: res.message });
   } else if (res.statusText === "fail" || res.statusText === "error") {
     return json({ message: res.message });
   }
@@ -51,8 +51,6 @@ export default function Login() {
         type={"email"}
         name={"email"}
         placeholder={"Email"}
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
       />
 
       <LabelInput
@@ -60,8 +58,6 @@ export default function Login() {
         type={"password"}
         name={"password"}
         placeholder={"Password"}
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
       />
 
       {actionData?.message && (
@@ -70,10 +66,10 @@ export default function Login() {
 
       <button
         type="submit"
-        disabled={!isFormValid || isSubmitting}
-        className={`bg-black text-white py-3 rounded-lg ${isFormValid ? "opacity-100" : "opacity-50"} ${isSubmitting && "cursor-not-allowed"}`}
+        disabled={isSubmitting}
+        className={`bg-black text-white py-3 rounded-lg ${isSubmitting && "opacity-50"} ${isSubmitting && "cursor-not-allowed"}`}
       >
-        {isSubmitting ? "Submitting..." : "Login"}
+        {isSubmitting ? "Sending OTP..." : "Get OTP"}
       </button>
     </Form>
   );

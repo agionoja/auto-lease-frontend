@@ -35,6 +35,9 @@ export default function VerifyAccount() {
       >
         {isSubmitting ? "Verifying..." : "Verify"}
       </button>
+      {actionData?.message && (
+        <div className="text-red-500">{actionData.message}</div>
+      )}
     </Form>
   );
 }
