@@ -15,7 +15,8 @@ export async function action({ request }: ActionFunctionArgs) {
   console.log(res);
 
   if (res.statusText === "success") {
-    return redirect("/auth/2fa/login");
+    // return redirect("/auth/2fa/login");
+    return json({ message: res.message });
   } else if (res.statusText === "fail" || res.statusText === "error") {
     return json({ message: res.message });
   }
@@ -24,6 +25,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
 export default function Login() {
   const actionData = useActionData();
+  console.log(actionData);
   const navigate = useNavigation();
   const isSubmitting = navigate.state === "submitting";
   const formRef = useRef<HTMLFormElement>(null);
