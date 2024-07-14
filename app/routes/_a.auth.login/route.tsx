@@ -7,8 +7,9 @@ import {
 import Form from "~/components/form";
 import { emailRegex } from "~/utils/validators";
 import { InputMsg } from "~/utils/enum";
-import { Link, useActionData } from "@remix-run/react";
+import { useActionData } from "@remix-run/react";
 import fetchClient from "~/api/fetchClient";
+import { AuthLinks } from "~/components/auth-links";
 
 export async function action({ request }: ActionFunctionArgs) {
   const { email, password } = Object.fromEntries(await request.formData());
@@ -36,10 +37,7 @@ export default function Login() {
     <>
       <Form
         btnLabel={{ static: "Get OTP", pending: "Sending OTP" }}
-        response={{
-          message: actionData?.response.message,
-          ok: actionData?.response.ok,
-        }}
+        response={actionData?.response}
         method={"POST"}
         inputArr={[
           {
@@ -68,14 +66,14 @@ export default function Login() {
           },
         ]}
       />
-      <div className="auth-side-action">
-        <Link to={"/auth/register"} className={"underline"}>
-          Register
-        </Link>
-        <Link to={"/auth/forgot-password"} className={"underline"}>
-          Forgot Password?
-        </Link>
-      </div>
+      <AuthLinks
+        links={[
+          { url: "/auth/register", urlText: "Create account" },
+          { url: "/auth/login", urlText: "Log in" },
+        ]}
+      />
     </>
   );
 }
+
+// todo: add auth

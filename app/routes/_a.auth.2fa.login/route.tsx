@@ -17,7 +17,6 @@ export async function action({ request }: ActionFunctionArgs) {
     body: JSON.stringify({ otp }),
   });
 
-  console.log(response);
   if (response.ok) return redirect("/");
   return json({ response });
 }
@@ -31,14 +30,9 @@ export const meta: MetaFunction = () => {
 
 export default function RequestToken() {
   const actionData = useActionData<typeof action>();
-
-  console.log(actionData?.response);
   return (
     <Form
-      response={{
-        message: actionData?.response?.message,
-        ok: actionData?.response?.ok,
-      }}
+      response={actionData?.response}
       method={"POST"}
       btnLabel={{
         static: "Login",
@@ -61,3 +55,5 @@ export default function RequestToken() {
     />
   );
 }
+
+// TODO: IMPLEMENT RESEND OTP
