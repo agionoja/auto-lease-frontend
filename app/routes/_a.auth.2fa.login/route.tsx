@@ -1,53 +1,62 @@
-import { ActionFunctionArgs, json, redirect } from "@remix-run/node";
-import { Form, useActionData, useNavigation } from "@remix-run/react";
-import { useEffect, useRef } from "react";
-import fetchClient from "~/utils/fetchClient";
-import { LabelInput } from "~/components/label-input";
+import {
+  ActionFunctionArgs,
+  json,
+  MetaFunction,
+  redirect,
+} from "@remix-run/node";
+import fetchClient from "~/api/fetchClient";
+import Form from "~/components/form";
+import { InputMsg } from "~/utils/enum";
+import { useActionData } from "@remix-run/react";
 
 export async function action({ request }: ActionFunctionArgs) {
   const { otp } = Object.fromEntries(await request.formData());
 
-  const res = await fetchClient(`/auth/2fa/`, {
+  const response = await fetchClient(`/auth/2fa/`, {
     method: "PATCH",
     body: JSON.stringify({ otp }),
   });
 
-  console.log(res);
-  if (res.statusText === "success") return redirect("/");
-  return json({ message: res.message });
+  if (response.ok) return redirect("/");
+  return json({ response });
 }
 
+export const meta: MetaFunction = () => {
+  return [
+    { title: "2FA", value: "One Time Password" },
+    { name: "2FA", content: "Two Factor Authentication" },
+  ];
+};
+
 export default function RequestToken() {
-  const actionData = useActionData();
-  console.log(actionData);
-  const navigate = useNavigation();
-  const isSubmitting = navigate.state === "submitting";
-  const formRef = useRef<HTMLFormElement>(null);
+  const actionData = useActionData<typeof action>();
 
-  useEffect(() => {
-    if (!isSubmitting) {
-      formRef?.current?.reset();
-    }
-  }, [isSubmitting]);
-
+  console.log(actionData?.response);
   return (
-    <Form ref={formRef} className={"flex flex-col gap-8 "} method={"POST"}>
-      <LabelInput
-        label={"Enter your OTP"}
-        type={"text"}
-        name={"otp"}
-        placeholder={"One Time Password"}
-      />
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className={`bg-black text-white py-3 rounded-lg ${isSubmitting && "opacity-50"} ${isSubmitting && "cursor-not-allowed"}`}
-      >
-        {isSubmitting ? "Verifying..." : "Enter"}
-      </button>
-      {actionData?.message && (
-        <div className="text-red-500">{actionData.message}</div>
-      )}{" "}
-    </Form>
+    <Form
+      response={{
+        message: actionData?.response?.message,
+        ok: actionData?.response?.ok,
+      }}
+      method={"POST"}
+      btnLabel={{
+        static: "Login",
+        pending: "Logging in",
+      }}
+      inputArr={[
+        {
+          label: "OTP",
+          inputProps: {
+            name: "otp",
+            placeholder: "Enter your OTP",
+            type: "number",
+            validator: {
+              message: InputMsg.OTP,
+              func: (value) => value.length === 6,
+            },
+          },
+        },
+      ]}
+    />
   );
 }
