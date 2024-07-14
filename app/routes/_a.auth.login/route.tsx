@@ -1,76 +1,81 @@
-import { ActionFunctionArgs, json, redirect } from "@remix-run/node";
-import { Form, useNavigation, useActionData } from "@remix-run/react";
-import { LabelInput } from "~/components/label-input";
-import fetchClient from "~/utils/fetchClient";
-import { useEffect, useRef, useState } from "react";
+import {
+  ActionFunctionArgs,
+  json,
+  MetaFunction,
+  redirect,
+} from "@remix-run/node";
+import Form from "~/components/form";
+import { emailRegex } from "~/utils/validators";
+import { InputMsg } from "~/utils/enum";
+import { Link, useActionData } from "@remix-run/react";
+import fetchClient from "~/api/fetchClient";
 
 export async function action({ request }: ActionFunctionArgs) {
   const { email, password } = Object.fromEntries(await request.formData());
 
-  const res = await fetchClient("/auth/sign-in", {
+  const response = await fetchClient("/auth/sign-in", {
     method: "POST",
     body: JSON.stringify({ email, password }),
   });
 
-  console.log(res);
-
-  if (res.statusText === "success") {
-    return redirect("/auth/2fa/login");
-    // return json({ message: res.message });
-  } else if (res.statusText === "fail" || res.statusText === "error") {
-    return json({ message: res.message });
-  }
-  return json({ message: "Network error occurred. Please try again later." });
+  if (response.ok) return redirect("/auth/2fa/login");
+  else return json({ response });
 }
 
+export const meta: MetaFunction = () => {
+  return [
+    { title: "Login" },
+    { name: "Authentication", content: "Log in to your account" },
+  ];
+};
+
 export default function Login() {
-  const actionData = useActionData();
-  console.log(actionData);
-  const navigate = useNavigation();
-  const isSubmitting = navigate.state === "submitting";
-  const formRef = useRef<HTMLFormElement>(null);
-
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isFormValid, setIsFormValid] = useState(false);
-
-  useEffect(() => {
-    setIsFormValid(email.length > 0 && password.length > 0);
-  }, [email, password]);
-
-  useEffect(() => {
-    if (!isSubmitting) {
-      formRef?.current?.reset();
-    }
-  }, [isSubmitting]);
+  const actionData = useActionData<typeof action>();
 
   return (
-    <Form ref={formRef} className={"flex flex-col gap-8 "} method={"POST"}>
-      <LabelInput
-        label={"Email"}
-        type={"email"}
-        name={"email"}
-        placeholder={"Email"}
+    <>
+      <Form
+        btnLabel={{ static: "Get OTP", pending: "Sending OTP" }}
+        response={{
+          message: actionData?.response.message,
+          ok: actionData?.response.ok,
+        }}
+        method={"POST"}
+        inputArr={[
+          {
+            label: "Email",
+            inputProps: {
+              name: "email",
+              placeholder: "Enter your email",
+              type: "email",
+              validator: {
+                message: InputMsg.EMAIL,
+                func: emailRegex,
+              },
+            },
+          },
+          {
+            label: "Password",
+            inputProps: {
+              name: "password",
+              placeholder: "Enter your password",
+              type: "password",
+              validator: {
+                func: (value) => value.length >= 1,
+                message: InputMsg.PASSWORD_LOGIN,
+              },
+            },
+          },
+        ]}
       />
-
-      <LabelInput
-        label={"Password"}
-        type={"password"}
-        name={"password"}
-        placeholder={"Password"}
-      />
-
-      {actionData?.message && (
-        <div className="text-red-500">{actionData.message}</div>
-      )}
-
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className={`bg-black text-white py-3 rounded-lg ${isSubmitting && "opacity-50"} ${isSubmitting && "cursor-not-allowed"}`}
-      >
-        {isSubmitting ? "Sending OTP..." : "Get OTP"}
-      </button>
-    </Form>
+      <div className="auth-side-action">
+        <Link to={"/auth/register"} className={"underline"}>
+          Register
+        </Link>
+        <Link to={"/auth/forgot-password"} className={"underline"}>
+          Forgot Password?
+        </Link>
+      </div>
+    </>
   );
 }

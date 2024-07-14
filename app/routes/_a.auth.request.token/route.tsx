@@ -1,8 +1,12 @@
-import { ActionFunctionArgs, json, redirect } from "@remix-run/node";
-import { Form, useActionData, useNavigation } from "@remix-run/react";
-import { useEffect, useRef } from "react";
-import fetchClient from "~/utils/fetchClient";
-import { LabelInput } from "~/components/label-input";
+import {
+  ActionFunctionArgs,
+  json,
+  MetaFunction,
+  redirect,
+} from "@remix-run/node";
+import fetchClient from "~/api/fetchClient";
+import Form from "~/components/form";
+import { emailRegex } from "~/utils/validators";
 
 export async function action({ request }: ActionFunctionArgs) {
   const { email } = Object.fromEntries(await request.formData());
@@ -17,37 +21,35 @@ export async function action({ request }: ActionFunctionArgs) {
   return json({ message: res.message });
 }
 
+export const meta: MetaFunction = () => {
+  return [
+    { title: "Request Token", value: "token" },
+    { name: "Verification", content: "Verify your account" },
+  ];
+};
+
 export default function RequestToken() {
-  const actionData = useActionData();
-  console.log(actionData);
-  const navigate = useNavigation();
-  const isSubmitting = navigate.state === "submitting";
-  const formRef = useRef<HTMLFormElement>(null);
-
-  useEffect(() => {
-    if (!isSubmitting) {
-      formRef?.current?.reset();
-    }
-  }, [isSubmitting]);
-
   return (
-    <Form ref={formRef} className={"flex flex-col gap-8 "} method={"POST"}>
-      <LabelInput
-        label={"Email Address"}
-        type={"email"}
-        name={"email"}
-        placeholder={"Email"}
-      />
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className={`bg-black text-white py-3 rounded-lg ${isSubmitting && "opacity-50"} ${isSubmitting && "cursor-not-allowed"}`}
-      >
-        {isSubmitting ? "Requesting..." : "Request Verification Token"}
-      </button>
-      {actionData?.message && (
-        <div className="text-red-500">{actionData.message}</div>
-      )}{" "}
-    </Form>
+    <Form
+      method={"POST"}
+      btnLabel={{
+        static: "Request verification token",
+        pending: "Sending verification token",
+      }}
+      inputArr={[
+        {
+          label: "Email",
+          inputProps: {
+            name: "email",
+            type: "email",
+            placeholder: "Enter your email",
+            validator: {
+              message: "Invalid email address",
+              func: emailRegex,
+            },
+          },
+        },
+      ]}
+    />
   );
 }

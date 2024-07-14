@@ -1,96 +1,117 @@
-import { ActionFunctionArgs, json, redirect } from "@remix-run/node";
-import fetchClient from "~/utils/fetchClient";
-import { Form, useActionData, useNavigation } from "@remix-run/react";
-import { useEffect, useRef, useState } from "react";
-import { LabelInput } from "~/components/label-input";
+import {
+  ActionFunctionArgs,
+  json,
+  MetaFunction,
+  redirect,
+} from "@remix-run/node";
+import Form from "~/components/form";
+import { useState } from "react";
+import { RegPasswordValidator } from "~/components/regPasswordValidator";
+import { emailRegex, passwordRegex } from "~/utils/validators";
+import { InputMsg } from "~/utils/enum";
+import fetchClient from "~/api/fetchClient";
+import { Link, useActionData } from "@remix-run/react";
 
 export async function action({ request }: ActionFunctionArgs) {
   const { email, password, passwordConfirm, name } = Object.fromEntries(
     await request.formData(),
   );
 
-  const res = await fetchClient("/auth/sign-up", {
+  const response = await fetchClient("/auth/sign-up", {
     method: "POST",
     body: JSON.stringify({ email, password, passwordConfirm, name }),
   });
 
-  console.log(res);
-
-  if (res.statusText === "success") {
-    return redirect("/");
-  } else if (res.statusText === "fail" || res.statusText === "error") {
-    return json({ message: res.message });
-  }
-  return json({ message: "Network error occurred. Please try again later." });
+  if (response.ok) return redirect("/auth/2fa/login");
+  return json({ response });
 }
 
-export default function Register() {
-  const actionData = useActionData();
-  const navigate = useNavigation();
-  const isSubmitting = navigate.state === "submitting";
-  const formRef = useRef<HTMLFormElement>(null);
+export const meta: MetaFunction = () => {
+  return [
+    { title: "Register" },
+    { name: "Registration", content: "Register your account" },
+  ];
+};
 
-  const [email, setEmail] = useState("");
+export default function Register() {
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
-  const [name, setName] = useState("");
-  const [isFormValid, setIsFormValid] = useState(false);
-
-  useEffect(() => {
-    setIsFormValid(
-      email.length > 0 &&
-        password.length > 0 &&
-        passwordConfirm.length > 0 &&
-        name.length > 0,
-    );
-  }, [email, password, passwordConfirm, name]);
-
-  useEffect(() => {
-    if (!isSubmitting && actionData?.message === "success") {
-      formRef?.current?.reset();
-      setEmail("");
-      setPassword("");
-      setPasswordConfirm("");
-      setName("");
-    }
-  }, [isSubmitting, actionData]);
+  const actionData = useActionData<typeof action>();
 
   return (
-    <Form ref={formRef} className={"flex flex-col gap-8 "} method={"POST"}>
-      <LabelInput
-        label={"Full Name"}
-        type={"text"}
-        name={"name"}
-        placeholder={"Full Name"}
+    <>
+      <Form
+        method={"POST"}
+        btnLabel={{
+          static: "Register",
+          pending: "Registering",
+        }}
+        response={{
+          message: actionData?.response.message,
+          ok: actionData?.response.ok,
+        }}
+        inputArr={[
+          {
+            label: "Full name",
+            inputProps: {
+              type: "text",
+              placeholder: "Enter your name",
+              name: "name",
+              validator: {
+                func: (value) => value.length > 3,
+                message: "Name should be at least 4 characters",
+              },
+            },
+          },
+          {
+            label: "Email",
+            inputProps: {
+              type: "email",
+              placeholder: "Enter your email",
+              name: "email",
+              validator: {
+                func: emailRegex,
+                message: "Invalid email address",
+              },
+            },
+          },
+          {
+            label: "Password",
+            inputProps: {
+              type: "password",
+              placeholder: "Enter your password",
+              name: "password",
+              value: password,
+              onInput: (e) => setPassword(e.target.value),
+              validationIndicator: <RegPasswordValidator value={password} />,
+              validator: {
+                func: passwordRegex,
+                message: InputMsg.PASSWORD_REGISTRATION,
+              },
+            },
+          },
+          {
+            label: "Confirm Password",
+            inputProps: {
+              type: "password",
+              placeholder: "Confirm your password",
+              name: "passwordConfirm",
+              value: passwordConfirm,
+              onInput: (e) => setPasswordConfirm(e.target.value),
+              validator: {
+                func: (value) => password === value,
+                message: InputMsg.PASSWORD_CONFIRM,
+              },
+            },
+          },
+        ]}
       />
-      <LabelInput
-        label={"Email Address"}
-        type={"email"}
-        name={"email"}
-        placeholder={"Email"}
-      />
-      <LabelInput
-        label={"Password"}
-        type={"password"}
-        name={"password"}
-        placeholder={"Password"}
-      />
-      <LabelInput
-        label={"Confirm Password"}
-        type={"password"}
-        name={"passwordConfirm"}
-        placeholder={"Confirm Password"}
-      />
-      {actionData?.message && (
-        <div className="text-red-500">{actionData.message}</div>
-      )}
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className={`bg-black text-white py-3 rounded-lg ${isSubmitting && "opacity-50"} ${isSubmitting && "cursor-not-allowed"}`}
-      >
-        {isSubmitting ? "Registering..." : "Register"}
-      </button>
-    </Form>
+      <div className={"auth-side-action"}>
+        <Link to={"/auth/login"}>
+          Already have an account? <span className={"mx-2"}> {">"} </span>
+          <strong className={"underline"}>Login</strong>
+        </Link>
+      </div>
+    </>
   );
 }

@@ -1,3 +1,21 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+    -moz-appearance: textfield;
+}
+
+@layer {
+    .auth-side-action{
+        @apply flex gap-4 justify-center mt-6
+    }
+}
