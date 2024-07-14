@@ -16,25 +16,45 @@ export type InputProps = {
   fileType?: "pdf" | "image/jpg" | "image/png" | "image/jpeg" | "*";
   onInput?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onBlur?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onFocus?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void;
   onGetIsValid?: (value: boolean) => void;
 };
 
 export function Input(props: InputProps) {
   const [isValid, setIsValid] = useState(true);
+  const [value, setValue] = useState(props.value || "");
+  const [touched, setTouched] = useState(false);
+  const [debounceTimeout, setDebounceTimeout] = useState<NodeJS.Timeout | null>(
+    null,
+  );
 
   const handleInput = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (props.validator) {
-      const isValid = props.validator.func(event.target.value);
-      setIsValid(isValid);
-      if (props.onGetIsValid) props.onGetIsValid(isValid);
-    } else props.onGetIsValid && props.onGetIsValid(true);
+    const newValue = event.target.value;
+    setValue(newValue);
+
+    if (debounceTimeout) clearTimeout(debounceTimeout);
+
+    const timeout = setTimeout(() => {
+      if (props.validator) {
+        const isValid = props.validator.func(newValue);
+        setIsValid(isValid);
+        if (props.onGetIsValid) props.onGetIsValid(isValid);
+      } else if (props.onGetIsValid) {
+        props.onGetIsValid(true);
+      }
+    }, 200); // Debounce delay time
+
+    setDebounceTimeout(timeout);
+
     if (props.onInput) props.onInput(event);
   };
 
   const handleBlur = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setTouched(true);
     if (props.validator) {
-      setIsValid(props.validator.func(event.target.value));
+      const isValid = props.validator.func(event.target.value);
+      setIsValid(isValid);
+      if (props.onGetIsValid) props.onGetIsValid(isValid);
     }
     if (props.onBlur) {
       props.onBlur(event);
@@ -42,10 +62,6 @@ export function Input(props: InputProps) {
   };
 
   const handleFocus = (event: React.FocusEvent<HTMLInputElement>) => {
-    if (props.validator) {
-      setIsValid(props.validator.func(event.target.value));
-    }
-
     if (props.onFocus) {
       props.onFocus(event);
     }
@@ -57,21 +73,23 @@ export function Input(props: InputProps) {
         id={props.name}
         accept={props.fileType}
         placeholder={props.placeholder}
-        className={`px-4 focus:outline-none focus:ring-2 focus:ring-blue-400 outline outline-2 rounded-lg ${isValid ? "outline-gray-200" : "outline-red-500"} ${props.type === "file" ? "py-4" : "py-2.5"}`}
+        className={`px-4 focus:outline-none focus:ring-2 focus:ring-blue-400 outline outline-2 outline-secondary rounded-lg  ${props.type === "file" ? "py-4" : "py-2.5"}`}
         type={props.type}
         name={props.name}
-        value={props.value}
+        value={value}
         onInput={handleInput}
         onBlur={handleBlur}
         onFocus={handleFocus}
         required={props.required}
       />
-      <div
-        className={`${props.validationIndicator && "mt-4 flex flex-col gap-2.5"}`}
-      >
-        {props.validationIndicator}
-      </div>
-      {!props.validationIndicator && !isValid && (
+
+      {props.validationIndicator && (
+        <div className={"mt-4 flex flex-col gap-2.5"}>
+          {props.validationIndicator}
+        </div>
+      )}
+
+      {!props.validationIndicator && !isValid && touched && (
         <span className="text-red-500 text-xs">{props.validator?.message}</span>
       )}
     </>

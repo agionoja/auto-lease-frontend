@@ -1,61 +1,57 @@
 import { ActionFunctionArgs, json, MetaFunction } from "@remix-run/node";
-import Form from "~/components/form";
-import { InputMsg } from "~/utils/enum";
-import { emailRegex } from "~/utils/validators";
 import fetchClient from "~/api/fetchClient";
+import Form from "~/components/form";
+import { emailRegex } from "~/utils/validators";
 import { useActionData } from "@remix-run/react";
 import { AuthLinks } from "~/components/auth-links";
 
 export async function action({ request }: ActionFunctionArgs) {
   const { email } = Object.fromEntries(await request.formData());
-  const response = await fetchClient("/auth/forgot-password", {
+
+  const response = await fetchClient(`/auth/request/token`, {
     method: "PATCH",
     body: JSON.stringify({ email }),
   });
 
-  return json({ response });
+  return json({
+    response,
+  });
 }
 
 export const meta: MetaFunction = () => {
   return [
-    { title: "Forgot Password" },
-    { name: "Forgot Password", content: "Forgot your password, get a token" },
+    { title: "Request Token", value: "token" },
+    { name: "Verification", content: "Verify your account" },
   ];
 };
 
-export default function Route() {
+export default function RequestToken() {
   const actionData = useActionData<typeof action>();
   return (
     <>
       <Form
         method={"POST"}
-        btnLabel={{
-          static: "Get Reset Token",
-          pending: "Sending reset token",
-        }}
         response={actionData?.response}
+        btnLabel={{
+          static: "Request verification token",
+          pending: "Sending verification token",
+        }}
         inputArr={[
           {
-            label: "email",
+            label: "Email",
             inputProps: {
-              type: "email",
               name: "email",
+              type: "email",
               placeholder: "Enter your email",
-              required: true,
               validator: {
-                message: InputMsg.EMAIL,
+                message: "Invalid email address",
                 func: emailRegex,
               },
             },
           },
         ]}
       />
-      <AuthLinks
-        links={[
-          { url: "/auth/register", urlText: "Create account" },
-          { url: "/auth/login", urlText: "Log in" },
-        ]}
-      />
+      <AuthLinks links={[{ url: "/auth/login", urlText: "Log in" }]} />
     </>
   );
 }

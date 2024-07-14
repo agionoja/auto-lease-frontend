@@ -10,7 +10,8 @@ import { RegPasswordValidator } from "~/components/regPasswordValidator";
 import { emailRegex, passwordRegex } from "~/utils/validators";
 import { InputMsg } from "~/utils/enum";
 import fetchClient from "~/api/fetchClient";
-import { Link, useActionData } from "@remix-run/react";
+import { useActionData } from "@remix-run/react";
+import { AuthLinks } from "~/components/auth-links";
 
 export async function action({ request }: ActionFunctionArgs) {
   const { email, password, passwordConfirm, name } = Object.fromEntries(
@@ -22,7 +23,7 @@ export async function action({ request }: ActionFunctionArgs) {
     body: JSON.stringify({ email, password, passwordConfirm, name }),
   });
 
-  if (response.ok) return redirect("/auth/2fa/login");
+  if (response.ok) return redirect("/");
   return json({ response });
 }
 
@@ -46,10 +47,7 @@ export default function Register() {
           static: "Register",
           pending: "Registering",
         }}
-        response={{
-          message: actionData?.response.message,
-          ok: actionData?.response.ok,
-        }}
+        response={actionData?.response}
         inputArr={[
           {
             label: "Full name",
@@ -58,7 +56,7 @@ export default function Register() {
               placeholder: "Enter your name",
               name: "name",
               validator: {
-                func: (value) => value.length > 3,
+                func: (value) => value.trim().length > 3,
                 message: "Name should be at least 4 characters",
               },
             },
@@ -106,12 +104,20 @@ export default function Register() {
           },
         ]}
       />
-      <div className={"auth-side-action"}>
-        <Link to={"/auth/login"}>
-          Already have an account? <span className={"mx-2"}> {">"} </span>
-          <strong className={"underline"}>Login</strong>
-        </Link>
-      </div>
+
+      <AuthLinks
+        links={[
+          {
+            url: "/auth/login",
+            urlText: (
+              <>
+                Already have an account? <span className={"mx-2"}> {">"} </span>
+                <strong className={"underline"}>Login</strong>
+              </>
+            ),
+          },
+        ]}
+      />
     </>
   );
 }

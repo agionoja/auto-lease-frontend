@@ -84,17 +84,16 @@ export default function Form<T>({
         />
       ))}
       <button
-        disabled={disabled}
+        disabled={isSubmitting || !allValid}
         type="submit"
-        aria-hidden={disabled}
-        className={`bg-black text-white py-3.5 rounded-xl ${disabled && "cursor-not-allowed"} ${isSubmitting && "animate-pulse"}`}
+        className={`bg-black text-white py-3.5 rounded-xl ${isSubmitting && "animate-pulse cursor-not-allowed"} ${!allValid && "bg-secondary cursor-not-allowed"} `}
       >
         {isSubmitting ? `${btnLabel?.pending}....` : btnLabel?.static}
       </button>
 
       {response?.message && (
         <span
-          className={`${response.ok ? "text-black" : "text-red-400"} text-sm mx-auto min-w-[300px] max-w-[30rem] text-center`}
+          className={`${response.ok ? "text-black" : "text-accent"} text-sm mx-auto min-w-[300px] max-w-[30rem] text-center`}
         >
           {response.message}
         </span>

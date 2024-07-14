@@ -7,6 +7,7 @@ import {
 import fetchClient from "~/api/fetchClient";
 import Form from "~/components/form";
 import { useActionData } from "@remix-run/react";
+import { AuthLinks } from "~/components/auth-links";
 
 export async function action({ params }: ActionFunctionArgs) {
   const res = await fetchClient(`/auth/verify/${params.token}`, {
@@ -27,13 +28,16 @@ export const meta: MetaFunction = () => {
 export default function VerifyAccount() {
   const actionData = useActionData<typeof action>();
   return (
-    <Form
-      response={actionData?.response}
-      method={"POST"}
-      btnLabel={{
-        static: "Verify account",
-        pending: "Verifying account",
-      }}
-    />
+    <>
+      <Form
+        response={actionData?.response}
+        method={"POST"}
+        btnLabel={{
+          static: "Verify account",
+          pending: "Verifying account",
+        }}
+      />
+      <AuthLinks links={[{ url: "/auth/login", urlText: "Log in" }]} />
+    </>
   );
 }

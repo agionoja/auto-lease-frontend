@@ -27,7 +27,7 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-export default function Route() {
+export default function ResetPassword() {
   const actionData = useActionData<typeof action>();
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
@@ -65,7 +65,7 @@ export default function Route() {
               value: passwordConfirm,
               onInput: (e) => setPasswordConfirm(e.target.value),
               validator: {
-                func: (value) => value === password,
+                func: () => password === password,
                 message: InputMsg.PASSWORD_CONFIRM,
               },
             },
