@@ -28,8 +28,7 @@ export function Input(props: InputProps) {
       const isValid = props.validator.func(event.target.value);
       setIsValid(isValid);
       if (props.onGetIsValid) props.onGetIsValid(isValid);
-    }
-    if (props.onGetIsValid && !props.validator) props.onGetIsValid(true);
+    } else props.onGetIsValid && props.onGetIsValid(true);
     if (props.onInput) props.onInput(event);
   };
 
@@ -51,12 +50,6 @@ export function Input(props: InputProps) {
       props.onFocus(event);
     }
   };
-
-  useEffect(() => {
-    if (props.value && props.validator) {
-      setIsValid(props.validator.func(props.value));
-    }
-  }, [props.value, props.validator]);
 
   return (
     <>

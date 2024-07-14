@@ -1,18 +1,18 @@
 import { ActionFunctionArgs, json, MetaFunction } from "@remix-run/node";
 import fetchClient from "~/api/fetchClient";
-import { Link, useActionData } from "@remix-run/react";
+import { useActionData } from "@remix-run/react";
 import Form from "~/components/form";
 import { passwordRegex } from "~/utils/validators";
 import { InputMsg } from "~/utils/enum";
 import { RegPasswordValidator } from "~/components/regPasswordValidator";
 import { useState } from "react";
+import { AuthLinks } from "~/components/auth-links";
 
 export async function action({ request, params }: ActionFunctionArgs) {
   const { password, passwordConfirm } = Object.fromEntries(
     await request.formData(),
   );
 
-  console.log(params.token);
   const response = await fetchClient(`/auth/reset-password/${params.token}`, {
     method: "PATCH",
     body: JSON.stringify({ password, passwordConfirm }),
@@ -36,10 +36,7 @@ export default function Route() {
     <>
       <Form
         method={"POST"}
-        response={{
-          message: actionData?.response.message,
-          ok: actionData?.response.ok,
-        }}
+        response={actionData?.response}
         btnLabel={{
           static: "Reset password",
           pending: "Resetting password",
@@ -75,11 +72,7 @@ export default function Route() {
           },
         ]}
       />
-      <div className={"auth-side-action"}>
-        <Link to={"/auth/login"} className={"underline"}>
-          Login
-        </Link>
-      </div>
+      <AuthLinks links={[{ url: "/auth/login", urlText: "Log in" }]} />
     </>
   );
 }

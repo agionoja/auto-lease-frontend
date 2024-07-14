@@ -1,6 +1,6 @@
 const baseUrl = "https://auto-lease.onrender.com/api/v1"; // Replace with your base URL
 
-type FetchResult<T> = {
+export type FetchResult<T> = {
   statusText: "success" | "fail" | "error" | "networkError";
   status: number;
   data?: T;
