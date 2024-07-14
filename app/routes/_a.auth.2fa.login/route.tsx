@@ -17,6 +17,7 @@ export async function action({ request }: ActionFunctionArgs) {
     body: JSON.stringify({ otp }),
   });
 
+  console.log(response);
   if (response.ok) return redirect("/");
   return json({ response });
 }

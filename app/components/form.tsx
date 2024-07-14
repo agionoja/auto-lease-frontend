@@ -2,22 +2,18 @@ import { Form as RemixForm, useNavigation } from "@remix-run/react";
 import { InputProps } from "~/components/input";
 import { LabelInput } from "~/components/label-input";
 import { useEffect, useRef, useState } from "react";
+import type { FetchResult } from "~/api/fetchClient";
 
 type BtnLabel = {
   static: string;
   pending: string;
 };
 
-type Response = {
-  message?: string;
-  ok?: boolean;
-};
-
-type Props = {
+type Props<T> = {
   action?: string;
   method?: "POST" | "PATCH" | "DELETE" | "GET";
   btnLabel?: BtnLabel;
-  response: Response;
+  response?: FetchResult<T>;
   inputArr?: Array<{
     inputProps: InputProps;
     label: string;
@@ -28,23 +24,23 @@ type Props = {
     | "text/plain";
 };
 
-export default function Form({
+export default function Form<T>({
   inputArr,
   action,
   method = "GET",
   encType = "application/x-www-form-urlencoded",
   btnLabel,
   response,
-}: Props) {
+}: Props<T>) {
   const formRef = useRef<HTMLFormElement>(null);
   const [allValid, setAllValid] = useState(false);
   const [allInputValidity, setAllInputValidity] = useState<boolean[]>(
-    new Array(inputArr?.length).fill(false),
+    new Array(inputArr?.length || 0).fill(false),
   );
 
   const { state } = useNavigation();
   const isSubmitting = state === "submitting" || state === "loading";
-  const disabled = isSubmitting || !allValid;
+  const disabled = isSubmitting ? true : !allValid && true;
 
   useEffect(() => {
     if (!isSubmitting && response?.ok) formRef?.current?.reset();
@@ -58,6 +54,7 @@ export default function Form({
     setAllInputValidity((prevState) => {
       const newValidity = [...prevState];
       newValidity[index] = isValid;
+      console.log({ newValidity });
       return newValidity;
     });
   };
@@ -89,9 +86,10 @@ export default function Form({
       <button
         disabled={disabled}
         type="submit"
-        className={`bg-black text-white py-3.5 rounded-xl ${isSubmitting && "animate-pulse cursor-not-allowed"}`}
+        aria-hidden={disabled}
+        className={`bg-black text-white py-3.5 rounded-xl ${disabled && "cursor-not-allowed"} ${isSubmitting && "animate-pulse"}`}
       >
-        {isSubmitting ? `${btnLabel?.pending}..` : btnLabel?.static}
+        {isSubmitting ? `${btnLabel?.pending}....` : btnLabel?.static}
       </button>
 
       {response?.message && (
