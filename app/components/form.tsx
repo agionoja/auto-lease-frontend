@@ -19,9 +19,9 @@ type Props<T> = {
     label: string;
   }>;
   encType?:
-    | "application/x-www-form-urlencoded"
     | "multipart/form-data"
-    | "text/plain";
+    | "text/plain"
+    | "application/x-www-form-urlencoded";
 };
 
 export default function Form<T>({
@@ -40,7 +40,7 @@ export default function Form<T>({
 
   const { state } = useNavigation();
   const isSubmitting = state === "submitting" || state === "loading";
-  const disabled = isSubmitting ? true : !allValid && true;
+  // const disabled = isSubmitting ? true : !allValid && true;
 
   useEffect(() => {
     if (!isSubmitting && response?.ok) formRef?.current?.reset();
@@ -54,7 +54,7 @@ export default function Form<T>({
     setAllInputValidity((prevState) => {
       const newValidity = [...prevState];
       newValidity[index] = isValid;
-      console.log({ newValidity });
+      // console.log({ newValidity });
       return newValidity;
     });
   };
@@ -86,7 +86,7 @@ export default function Form<T>({
       <button
         disabled={isSubmitting || !allValid}
         type="submit"
-        className={`bg-black text-white py-3.5 rounded-xl ${isSubmitting && "animate-pulse cursor-not-allowed"} ${!allValid && "bg-secondary cursor-not-allowed"} `}
+        className={`btn ${isSubmitting && "btn__submitting"} ${!allValid && "btn_all-valid"} `}
       >
         {isSubmitting ? `${btnLabel?.pending}....` : btnLabel?.static}
       </button>

@@ -7,6 +7,7 @@ type Validator = {
 
 export type InputProps = {
   type: string;
+  className?: string;
   placeholder: string;
   name: string;
   value?: string;
@@ -68,12 +69,16 @@ export function Input(props: InputProps) {
   };
 
   return (
-    <>
+    <div className={"relative w-full"}>
       <input
         id={props.name}
         accept={props.fileType}
         placeholder={props.placeholder}
-        className={`px-4 focus:outline-none focus:ring-2 focus:ring-blue-400 outline outline-2 outline-secondary rounded-lg  ${props.type === "file" ? "py-4" : "py-2.5"}`}
+        className={
+          props.className +
+          " " +
+          `px-4 w-full focus:outline-none flex flex-col focus:ring-2 focus:ring-blue-400 outline outline-2 outline-secondary rounded-lg  ${props.type === "file" ? "py-4" : "py-2.5"}`
+        }
         type={props.type}
         name={props.name}
         value={value}
@@ -90,8 +95,10 @@ export function Input(props: InputProps) {
       )}
 
       {!props.validationIndicator && !isValid && touched && (
-        <span className="text-red-500 text-xs">{props.validator?.message}</span>
+        <span className="text-red-500 text-xs absolute -bottom-6">
+          {props.validator?.message}
+        </span>
       )}
-    </>
+    </div>
   );
 }

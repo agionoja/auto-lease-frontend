@@ -12,7 +12,31 @@ export default {
       colors: {
         primary: "#f8f8f8",
         secondary: "#c6c6c6",
-        accent: "#FF0700",
+        accent: "#ff7f3e",
+        "off-black": "#1d1d1d",
+        "transparent-black": "rgba(0, 0, 0, 0.2)",
+      },
+
+      aspectRatio: {
+        "10/4": "10 / 6",
+      },
+
+      animation: {
+        slide: "5s slide infinite linear",
+      },
+      keyframes: {
+        slide: {
+          from: {
+            transform: "translateX(0)",
+          },
+          to: {
+            transform: "translateX(-100%)",
+          },
+        },
+      },
+
+      maxWidth: {
+        "screen-3xl": "2048px",
       },
     },
   },

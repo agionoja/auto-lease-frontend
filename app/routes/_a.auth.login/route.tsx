@@ -10,6 +10,11 @@ import { InputMsg } from "~/utils/enum";
 import { useActionData } from "@remix-run/react";
 import fetchClient from "~/api/fetchClient";
 import { AuthLinks } from "~/components/auth-links";
+import { alreadyHasSession } from "~/sesssion/session.server";
+
+export async function loader({ request }: ActionFunctionArgs) {
+  await alreadyHasSession(request);
+}
 
 export async function action({ request }: ActionFunctionArgs) {
   const { email, password } = Object.fromEntries(await request.formData());
@@ -17,9 +22,12 @@ export async function action({ request }: ActionFunctionArgs) {
   const response = await fetchClient("/auth/sign-in", {
     method: "POST",
     body: JSON.stringify({ email, password }),
+    headers: {
+      Authorization: "",
+    },
   });
 
-  if (response.ok) return redirect("/auth/2fa/login");
+  if (response.ok) return redirect("/auth/2fa");
   else return json({ response });
 }
 
@@ -75,5 +83,3 @@ export default function Login() {
     </>
   );
 }
-
-// todo: add auth

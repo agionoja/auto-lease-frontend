@@ -5,7 +5,7 @@ export function TopRated() {
   return (
     <div className={"flex flex-col gap-8"}>
       <h2 className={"text-center text-xl font-bold"}>Top Rated</h2>
-      <div className={"grid grid-cols-4"}>
+      <div className={"grid grid-cols-4 gap-6"}>
         <CarCard
           id={"2938473292"}
           imgUrl={img1}

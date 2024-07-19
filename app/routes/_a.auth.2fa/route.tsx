@@ -3,7 +3,6 @@ import {
   json,
   LoaderFunctionArgs,
   MetaFunction,
-  redirect,
 } from "@remix-run/node";
 import fetchClient from "~/api/fetchClient";
 import Form from "~/components/form";
@@ -12,7 +11,7 @@ import { useActionData } from "@remix-run/react";
 import {
   alreadyHasSession,
   commitSession,
-  getSession,
+  storeSession,
 } from "~/sesssion/session.server";
 
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -27,28 +26,14 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 export async function action({ request }: ActionFunctionArgs) {
   const { otp } = Object.fromEntries(await request.formData());
-  const session = await getSession(request.headers.get("Cookie"));
+
   const response = await fetchClient(`/auth/2fa/`, {
     method: "PATCH",
     body: JSON.stringify({ otp }),
   });
 
-  if (!response.ok) {
-    session.flash("error", response.message || "Something went very wrong.");
-
-    return redirect("/auth/login", {
-      headers: { "Set-Cookie": await commitSession(session) },
-    });
-  }
-
-  console.log(response.data, response.token);
-
-  if (response.token)
-    return redirect("/", {
-      headers: { "Set-Cookie": await commitSession(session) },
-    });
-
-  return null;
+  await storeSession("/2fa", response.ok, request, response.token);
+  return json({ response });
 }
 
 export const meta: MetaFunction = () => {
@@ -59,10 +44,10 @@ export const meta: MetaFunction = () => {
 };
 
 export default function RequestToken() {
-  // const actionData = useActionData<typeof action>();
+  const actionData = useActionData<typeof action>();
   return (
     <Form
-      // response={actionData?.response}
+      response={actionData?.response}
       method={"POST"}
       btnLabel={{
         static: "Login",

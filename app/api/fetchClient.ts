@@ -1,9 +1,20 @@
-const baseUrl = "https://auto-lease.onrender.com/api/v1"; // Replace with your base URL
+import * as process from "node:process";
+
+const baseUrlOnline = "https://auto-lease.onrender.com/api/v1"; // Replace with your base URL
+const baseUrlLocal = "http://localhost:3000/api/v1";
+
+const url = ({ localUrl = false }: { localUrl?: boolean }) =>
+  process.env.NODE_ENV === "production"
+    ? baseUrlOnline
+    : localUrl
+      ? baseUrlLocal
+      : baseUrlOnline;
 
 export type FetchResult<T> = {
   statusText: "success" | "fail" | "error" | "networkError";
   status: number;
   data?: T;
+  token?: string;
   message?: string;
   ok: boolean;
 };
@@ -29,13 +40,14 @@ async function fetchClient<T>(
   };
 
   try {
-    const res = await fetch(`${baseUrl}${endpoint}`, config);
+    const res = await fetch(`${url({ localUrl: true })}${endpoint}`, config);
 
     const json = await res.json();
 
     return {
       statusText: json.statusText,
       data: json.data,
+      token: json.token,
       message: json.message,
       status: res.status,
       ok: res.ok,

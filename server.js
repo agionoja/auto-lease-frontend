@@ -23,7 +23,7 @@ const app = express();
 app.use(compression());
 
 // http://expressjs.com/en/advanced/best-practice-security.html#at-a-minimum-disable-x-powered-by-header
-app.disable("x-powered-by");
+app.disable("x.js-powered-by");
 
 // handle asset requests
 if (viteDevServer) {

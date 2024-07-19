@@ -14,8 +14,36 @@ input[type=number] {
     -moz-appearance: textfield;
 }
 
-@layer {
+@layer utilities {
+    .pause{
+        animation-play-state: paused;
+    }
+}
+
+
+
+@layer  components{
     .auth-side-action{
         @apply flex gap-4 justify-center mt-6
+    }
+
+    .btn{
+        @apply bg-black text-white py-3.5 rounded-xl
+    }
+
+    .btn__submitting{
+        @apply animate-pulse cursor-not-allowed
+    }
+
+    .btn_all-valid{
+        @apply bg-secondary cursor-not-allowed
+    }
+
+    .link {
+        @apply px-4 py-2
+    }
+
+    .absolute-center{
+        @apply left-1/2 right-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2
     }
 }

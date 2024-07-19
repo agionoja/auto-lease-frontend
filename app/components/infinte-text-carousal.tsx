@@ -1,19 +1,18 @@
-type Props = {
+import React from "react";
+
+type Props = React.HTMLAttributes<HTMLDivElement> & {
   text: string;
 };
 
-function InfiniteTextCarousal({ text }: Props) {
-  const slideStyles = "animate-slide inline-block group-hover:pause";
+export function InfiniteTextCarousal({ text, ...rest }: Props) {
+  const slideStyles = "animate-slide inline-block group-hover:pause w-full";
   return (
     <>
-      <div className={"whitespace-nowrap group overflow-hidden"}>
-    <div className={slideStyles}>
-      <span>{text}</span>
+      <div {...rest} className={"group overflow-hidden w-full"}>
+        <div className={slideStyles + "outline outline-red-500 outline-2"}>
+          <span>{text}</span>
+        </div>
       </div>
-      <div className={slideStyles}>
-    <span>{text}</span>
-    </div>
-    </div>
     </>
-);
+  );
 }
